@@ -1,220 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contact Us</title>
-  <style>
-    :root{
-      --bg:#f6f7fb; --card:#ffffff; --accent:#2563eb; --muted:#6b7280;
-      --success:#16a34a; --danger:#dc2626; --radius:12px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    body{ margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); color:#111827; padding:24px; }
-    .card{ width:100%; max-width:720px; background:var(--card); border-radius:var(--radius); box-shadow: 0 6px 24px rgba(16,24,40,0.08); padding:28px; }
-    h1{ margin:0 0 8px; font-size:1.5rem; }
-    p.lead{ margin:0 0 18px; color:var(--muted); }
-    form{ display:grid; gap:12px; }
-    label{ font-size:.9rem; display:block; margin-bottom:6px; color:#111827; }
-    input[type="text"], input[type="email"], textarea, select {
-      width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef; font-size:1rem;
-      box-sizing:border-box;
-    }
-    textarea{ min-height:120px; resize:vertical; }
-    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .actions{ display:flex; gap:12px; align-items:center; margin-top:6px; }
-    button{ background:var(--accent); color:white; padding:10px 16px; border-radius:10px; border:0; cursor:pointer; font-weight:600; }
-    button[disabled]{ opacity:.6; cursor:not-allowed; }
-    .msg{ padding:10px 12px; border-radius:8px; font-weight:600; display:none; }
-    .msg.success{ background: #ecfdf5; color:var(--success); border:1px solid rgba(16,185,129,0.12); display:block; }
-    .msg.error{ background: #fff5f5; color:var(--danger); border:1px solid rgba(220,38,38,0.08); display:block; }
-    .helper{ font-size:.85rem; color:var(--muted); }
-    .visually-hidden{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
-    @media (max-width:600px){ .row{ grid-template-columns:1fr; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us</title>
+<style>
+body{ font-family:sans-serif; background:#f4f4f4; margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh;}
+form{ background:#fff; padding:24px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); max-width:480px; width:100%; display:flex; flex-direction:column; gap:12px;}
+input, textarea{width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; font-size:1rem; box-sizing:border-box;}
+button{ padding:10px; border:none; background:#2563eb; color:white; border-radius:6px; cursor:pointer; font-weight:bold;}
+button:disabled{opacity:.6; cursor:not-allowed;}
+.success{color:#16a34a; font-weight:bold;}
+.error{color:#dc2626; font-weight:bold;}
+</style>
 </head>
 <body>
-  <main class="card" aria-labelledby="contact-title">
-    <h1 id="contact-title">Contact Us</h1>
-    <p class="lead">Have a question, suggestion or project? Send us a message and we’ll get back to you soon.</p>
 
-    <!-- Message containers -->
-    <div id="successMsg" class="msg success" role="status" aria-live="polite" style="display:none;"></div>
-    <div id="errorMsg" class="msg error" role="alert" aria-live="assertive" style="display:none;"></div>
+<form id="contactForm">
+  <h2>Contact Us</h2>
+  <input type="text" name="name" placeholder="Your Name" required>
+  <input type="email" name="email" placeholder="Your Email" required>
+  <textarea name="message" placeholder="Your Message" required></textarea>
+  <button type="submit" id="submitBtn">Send Message</button>
+  <div id="feedback"></div>
+</form>
 
-    <!-- Contact Form -->
-    <form id="contactForm" novalidate>
-      <!-- Honeypot for spam bots (invisible to humans) -->
-      <label class="visually-hidden" for="company_hp">Company</label>
-      <input id="company_hp" name="company_hp" class="visually-hidden" autocomplete="off" tabindex="-1" />
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3jrlDXyKKZmdcj9E9EEpfqORZNfLa-Nt_kQR5EDR36ukr_rAY7tfvmAGKE5AtKlAZ/exec";
 
-      <div class="row">
-        <div>
-          <label for="name">Name <span aria-hidden="true">*</span></label>
-          <input id="name" name="name" type="text" required autocomplete="name" placeholder="Your full name" />
-        </div>
+const form = document.getElementById('contactForm');
+const feedback = document.getElementById('feedback');
+const submitBtn = document.getElementById('submitBtn');
 
-        <div>
-          <label for="email">Email <span aria-hidden="true">*</span></label>
-          <input id="email" name="email" type="email" required autocomplete="email" placeholder="name@company.com" />
-        </div>
-      </div>
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  feedback.textContent = '';
+  submitBtn.disabled = true;
 
-      <div>
-        <label for="subject">Subject</label>
-        <input id="subject" name="subject" type="text" placeholder="e.g. Product inquiry, Support request" />
-      </div>
+  const formData = {
+    name: form.name.value.trim(),
+    email: form.email.value.trim(),
+    message: form.message.value.trim()
+  };
 
-      <div>
-        <label for="message">Message <span aria-hidden="true">*</span></label>
-        <textarea id="message" name="message" required placeholder="Tell us about your request..."></textarea>
-      </div>
+  try {
+    const response = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(formData)
+    });
 
-      <div>
-        <label for="reason">Reason</label>
-        <select id="reason" name="reason" aria-label="Reason for contact">
-          <option value="">Select (optional)</option>
-          <option value="sales">Sales / Quote</option>
-          <option value="support">Support</option>
-          <option value="partnership">Partnership</option>
-          <option value="other">Other</option>
-        </select>
-        <p class="helper">Filling this helps us route your message faster.</p>
-      </div>
+    if (response.ok) {
+      feedback.textContent = "Message sent successfully!";
+      feedback.className = 'success';
+      form.reset();
+    } else {
+      feedback.textContent = "Failed to send message. Try again.";
+      feedback.className = 'error';
+    }
+  } catch (err) {
+    console.error(err);
+    feedback.textContent = "Network error. Please check your connection.";
+    feedback.className = 'error';
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+</script>
 
-      <div class="actions">
-        <button id="submitBtn" type="submit">Send Message</button>
-        <div id="spinner" aria-hidden="true" style="display:none;">Sending…</div>
-      </div>
-
-      <p class="helper">By submitting you agree to our <a href="#" target="_blank" rel="noopener">privacy policy</a>.</p>
-    </form>
-
-    <!-- If user has JS disabled -->
-    <noscript>
-      <p class="helper" style="color:var(--muted)">This form requires JavaScript to submit. Please enable JavaScript or email us at <a href="mailto:contact@example.com">contact@example.com</a>.</p>
-    </noscript>
-  </main>
-
-  <script>
-    (function(){
-      // === CONFIGURE THIS ===
-      const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxYJirBa7GVnBWTkK5xfwk59DY-EfgCqkylqlsgq-tGYhIUPUkXrbmIeRZbWLzRQACE/exec'; // <-- replace with your Apps Script web app URL
-
-      // DOM
-      const form = document.getElementById('contactForm');
-      const submitBtn = document.getElementById('submitBtn');
-      const spinner = document.getElementById('spinner');
-      const successMsg = document.getElementById('successMsg');
-      const errorMsg = document.getElementById('errorMsg');
-      const honeypot = document.getElementById('company_hp');
-
-      if (!WEB_APP_URL || WEB_APP_URL.includes('YOUR_WEB_APP_URL_HERE')) {
-        errorMsg.textContent = 'Form is not configured. Please set WEB_APP_URL in the script.';
-        errorMsg.style.display = 'block';
-      }
-
-      function showSuccess(text){
-        successMsg.textContent = text;
-        successMsg.style.display = 'block';
-        errorMsg.style.display = 'none';
-      }
-      function showError(text){
-        errorMsg.textContent = text;
-        errorMsg.style.display = 'block';
-        successMsg.style.display = 'none';
-      }
-
-      function setLoading(on){
-        if (on) {
-          submitBtn.disabled = true;
-          spinner.style.display = 'block';
-        } else {
-          submitBtn.disabled = false;
-          spinner.style.display = 'none';
-        }
-      }
-
-      // Client-side validation helper
-      function validate(formData){
-        const name = formData.get('name')?.trim();
-        const email = formData.get('email')?.trim();
-        const message = formData.get('message')?.trim();
-
-        if (!name) return 'Please enter your name.';
-        if (!email) return 'Please enter your email.';
-        // Basic email pattern - deliberately simple
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) return 'Please enter a valid email address.';
-        if (!message) return 'Please write a message.';
-        return '';
-      }
-
-      // Submit handler
-      form.addEventListener('submit', async function (evt) {
-        evt.preventDefault();
-        successMsg.style.display = 'none';
-        errorMsg.style.display = 'none';
-
-        // Spam check - if honeypot filled, assume bot
-        if (honeypot.value) {
-          // quietly do nothing, or optionally respond with success
-          showSuccess('Thank you!'); 
-          form.reset();
-          return;
-        }
-
-        const formData = new FormData(form);
-        const validationError = validate(formData);
-        if (validationError) {
-          showError(validationError);
-          return;
-        }
-
-        // Build payload
-        const payload = {
-          name: formData.get('name').trim(),
-          email: formData.get('email').trim(),
-          subject: (formData.get('subject') || '').trim(),
-          reason: formData.get('reason') || '',
-          message: formData.get('message').trim(),
-          // Add any extra metadata you want:
-          pageUrl: window.location.href,
-          userAgent: navigator.userAgent
-        };
-
-        setLoading(true);
-
-        try {
-          const res = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload),
-            credentials: 'omit'
-          });
-
-          // Attempt parse JSON response
-          let json = null;
-          try { json = await res.json(); } catch (e) { /* ignore */ }
-
-          if (res.ok) {
-            showSuccess('Message sent — thanks! We will reply shortly.');
-            form.reset();
-          } else {
-            // Use server message if provided, else generic
-            const errText = (json && json.error) ? json.error : ('Server returned status ' + res.status);
-            showError('Failed to send: ' + errText);
-          }
-        } catch (err) {
-          showError('Network error — please try again later.');
-          console.error('Submit error', err);
-        } finally {
-          setLoading(false);
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
